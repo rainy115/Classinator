@@ -5,20 +5,23 @@ import themePlugin from "@fullcalendar/react/themes/monarch"; // YOUR THEME
 import dayGridPlugin from "@fullcalendar/react/daygrid";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
+import { useState } from "react";
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
 
 export default function Calendar() {
+  const [showAddMenu, setShowAddMenu] = useState(false);
   return (
+    <>
     <FullCalendar
       plugins={[themePlugin, dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       headerToolbar={{
       left: "prev,next today",
       center: "title",
-      right: "dayGridMonth,timeGridWeek,timeGridDay"
+      right: "addButton,dayGridMonth,timeGridWeek,timeGridDay"
       }}
       events= {[
         {
@@ -39,6 +42,23 @@ export default function Calendar() {
       dateClick={(info) => {
         alert("Clicked on:" + info.dateStr);
       }}
+      buttons={{
+        addButton: {
+          text: "+",
+          click: () => setShowAddMenu(!showAddMenu)
+        }
+      }}
     />
+    {showAddMenu && (
+      <div>
+        <button onClick={() => alert("Add Assignment clicked")}>
+          Add Assignment
+          </button>
+          <button onClick ={() => alert("Add Event clciked")}>
+            Add Event
+          </button>
+        </div>
+    )}
+  </>
   );
 } 

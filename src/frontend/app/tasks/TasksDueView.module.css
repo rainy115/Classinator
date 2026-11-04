@@ -1,0 +1,104 @@
+.deadlines {
+	width: 100%;
+	margin: 28px 0;
+	padding: 0 20px;
+	color: #263630;
+	font-family: var(--font-geist-sans), sans-serif;
+}
+
+.heading {
+	margin: 0 0 14px;
+	padding: 10px 14px;
+	border-radius: 4px;
+	background: #245c4b;
+	color: #fff;
+	font-size: 20px;
+	font-weight: 600;
+	text-align: left;
+}
+
+.list {
+	display: grid;
+	width: 100%;
+	gap: 9px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.task {
+	display: flex;
+	width: 100%;
+	min-height: 68px;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 16px;
+	border: 1px solid #dfe6e1;
+	border-radius: 5px;
+	background: #fff;
+}
+
+.taskDetails {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 12px;
+	cursor: pointer;
+}
+
+.checkbox {
+	width: 17px;
+	height: 17px;
+	flex: 0 0 17px;
+	accent-color: #28644f;
+	cursor: pointer;
+}
+
+.taskText {
+	display: grid;
+	min-width: 0;
+	gap: 4px;
+}
+
+.title {
+	overflow: hidden;
+	color: #293731;
+	font-size: 14px;
+	font-weight: 550;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.course {
+	color: #78827d;
+	font-size: 12px;
+}
+
+.dueDate {
+	flex: 0 0 auto;
+	color: #46564e;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+@media (max-width: 480px) {
+	.deadlines {
+		margin-top: 20px;
+		padding: 0 12px;
+	}
+
+	.task {
+		gap: 10px;
+		padding: 11px 12px;
+	}
+
+	.title {
+		font-size: 13px;
+	}
+
+	.dueDate {
+		font-size: 12px;
+	}
+}

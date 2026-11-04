@@ -11,12 +11,15 @@ function formatDueDate(dateString) {
 }
 
 export default function TasksDueView({ tasks, onToggleTask }) {
+	const sortedTasks = [...tasks].sort((first, second) =>
+		first.dueDate.localeCompare(second.dueDate)
+	);
 
 	return (
 		<section className={styles.deadlines}>
 			<h1 className={styles.heading}>Upcoming Deadlines</h1>
 			<ul className={styles.list}>
-				{tasks.map((task) => (
+				{sortedTasks.map((task) => (
 					<li className={styles.task} key={task.id}>
 						<label className={styles.taskDetails}>
 							<input

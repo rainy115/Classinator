@@ -6,6 +6,7 @@ import dayGridPlugin from "@fullcalendar/react/daygrid";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
 import { useState } from "react";
+import AddAssignmentPopup from "../components/calendar/addAssignmentPopup";
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
@@ -13,6 +14,7 @@ import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S
 
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   return (
     <>
     <FullCalendar
@@ -51,14 +53,18 @@ export default function Calendar() {
     />
     {showAddMenu && (
       <div>
-        <button onClick={() => alert("Add Assignment clicked")}>
+        <button onClick={() => setShowAssignmentPopup(true)}>
           Add Assignment
           </button>
-          <button onClick ={() => alert("Add Event clciked")}>
+          <button onClick={() => alert("Add Event clciked")}>
             Add Event
           </button>
         </div>
     )}
+    <AddAssignmentPopup
+      isOpen={showAssignmentPopup}
+      onClose={() => setShowAssignmentPopup(false)}
+    />
   </>
   );
 } 

@@ -10,6 +10,7 @@ import { useState } from "react";
 import EventForm from "../components/EventForm";
 
 import TasksDueView from "./tasks/TasksDueView";
+import TimelineView from "./timeline/TimelineView";
 
 import AddAssignmentPopup from "../components/calendar/addAssignmentPopup";
 
@@ -24,25 +25,22 @@ const initialTasks = [
   { id: 3, title: "Project 1", course: "CS 310", dueDate: "2026-11-07", completed: false },
 ];
 
+const events = [
+  { title: 'Test event 1', start: '2026-11-01T10:00', color: "blue" },
+  { title: 'event2', start: '2026-11-05T09:00', end: '2026-11-07T17:00' },
+];
+
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
 
   const [showEventForm, setShowEventForm] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
   const [tasks, setTasks] = useState(initialTasks);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
 
 
   const calendarEvents = [
-    {
-      title: 'Test event 1',
-      start: '2026-11-01',
-      color: "blue",
-    },
-    {
-      title: 'event2',
-      start: '2026-11-05',
-      end: '2026-11-07',
-    },
+    ...events,
     ...tasks.map((task) => ({
       id: `task-${task.id}`,
       title: `${task.course}: ${task.title}`,
@@ -57,13 +55,19 @@ export default function Calendar() {
     ));
   }
 
+ 
+
+  if (showTimeline) {
+    return <TimelineView tasks={tasks} events={events} onBack={() => setShowTimeline(false)} />;
+  }
+
   return (
     <>
     <FullCalendar
       plugins={[themePlugin, dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       headerToolbar={{
-      left: "prev,next today",
+      left: "prev,next today timelineButton",
       center: "title",
       right: "addButton,dayGridMonth,timeGridWeek,timeGridDay"
       }}
@@ -79,6 +83,10 @@ export default function Calendar() {
         addButton: {
           text: "+",
           click: () => setShowAddMenu(!showAddMenu)
+        },
+        timelineButton: {
+          text: "Timeline",
+          click: () => setShowTimeline(true)
         }
       }}
     />

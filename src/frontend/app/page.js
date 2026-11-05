@@ -6,6 +6,7 @@ import dayGridPlugin from "@fullcalendar/react/daygrid";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
 import { useState } from "react";
+import EventForm from "../components/EventForm";
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
@@ -13,6 +14,7 @@ import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S
 
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
   return (
     <>
     <FullCalendar
@@ -50,14 +52,24 @@ export default function Calendar() {
       }}
     />
     {showAddMenu && (
-      <div>
+      <div className="add-menu">
+
         <button onClick={() => alert("Add Assignment clicked")}>
           Add Assignment
           </button>
-          <button onClick ={() => alert("Add Event clciked")}>
+
+          <button onClick={() => {
+            console.log("Add Event clicked!");
+            setShowEventForm(true);
+            setShowAddMenu(false);
+          }}>
             Add Event
           </button>
+
         </div>
+    )}
+      {showEventForm && (
+        <EventForm onSave={handleSaveEvent} />
     )}
   </>
   );

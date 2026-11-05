@@ -9,6 +9,7 @@ import { useState } from "react";
 import TasksDueView from "./tasks/TasksDueView";
 import TimelineView from "./timeline/TimelineView";
 
+import AddAssignmentPopup from "../components/calendar/addAssignmentPopup";
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
@@ -45,6 +46,8 @@ export default function Calendar() {
     ));
   }
 
+  const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
+
   if (showTimeline) {
     return <TimelineView tasks={tasks} events={events} onBack={() => setShowTimeline(false)} />;
   }
@@ -80,15 +83,19 @@ export default function Calendar() {
     />
     {showAddMenu && (
       <div>
-        <button onClick={() => alert("Add Assignment clicked")}>
+        <button onClick={() => setShowAssignmentPopup(true)}>
           Add Assignment
           </button>
-          <button onClick ={() => alert("Add Event clciked")}>
+          <button onClick={() => alert("Add Event clciked")}>
             Add Event
           </button>
         </div>
     )}
       <TasksDueView tasks={tasks} onToggleTask={toggleTask} />
+    <AddAssignmentPopup
+      isOpen={showAssignmentPopup}
+      onClose={() => setShowAssignmentPopup(false)}
+    />
   </>
   );
 } 

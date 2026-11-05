@@ -28,6 +28,8 @@
 
 .header {
 	font-weight: bold;
+	background: #245c4b;
+	color: #fff;
 }
 
 .backButton {

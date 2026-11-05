@@ -103,7 +103,7 @@ export default function Calendar() {
         </div>
     )}
       {showEventForm && (
-        <EventForm /> //needs onSave={handleSaveEvent} tbd
+        <EventForm onClose={() => setShowEventForm(false)} />
     )}
       <TasksDueView tasks={tasks} onToggleTask={toggleTask} />
     <AddAssignmentPopup

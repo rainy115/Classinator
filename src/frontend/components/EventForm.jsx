@@ -1,21 +1,26 @@
 "use client";
 
 import { useState } from "react";
-export default function EventForm() {
+import styles from "./EventForm.module.css";
+export default function EventForm({ onClose }) {
 
   const [title, setTitle] = useState("");
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    console.log("Saving event:", title);
-  }
-
   return (
 
-    <div className="event-popup">
+    <div 
+        className={styles.backdrop}
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }
+    }>
 
+        <div className={styles.popup}>
       <h2>Add Event</h2>
-      <form onSubmit={handleSubmit}> //onsubmit instead of click j in case user presses enter instead of clicking save button
+
+      <form className={styles.form}> 
 
         <label> Event Name: </label>
           <input
@@ -24,7 +29,7 @@ export default function EventForm() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             />
-            <p>You entered: {title}</p>
+
 
         <label> Event Date: </label>
           <input type="date" placeholder="Select Event Date" />
@@ -38,9 +43,10 @@ export default function EventForm() {
         <label> Event Description: </label>
         <textarea placeholder="Enter Event Description" />
 
-        <button type="submit">Save Event</button>
+        <button className={styles.saveButton} type="submit">Save Event</button>
 
       </form>
+    </div>
     </div>
   );
 }

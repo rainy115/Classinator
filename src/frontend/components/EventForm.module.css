@@ -1,0 +1,48 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 800;
+}
+
+.popup {
+  background: white;
+  color: black;
+  padding: 28px;
+  border-radius: 12px;
+  max-width: 90vw;
+  width: 500px;
+}
+
+.popup h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form input, .form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgb(5, 5, 5);
+  border-radius: 6px;
+  background: white;
+  color: black;
+  font-size: 16px;
+}
+
+.saveButton {
+  padding: 10px;
+  background-color: #2d6350;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

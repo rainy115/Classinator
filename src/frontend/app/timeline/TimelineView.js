@@ -4,6 +4,10 @@
 
 import styles from "./TimelineView.module.css";
 
+function formatDate(date) {
+	return new Date(date).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" });
+}
+
 export default function TimelineView({ tasks, events, onBack }) {
 	const items = [
 		...tasks.map((task) => ({
@@ -14,6 +18,7 @@ export default function TimelineView({ tasks, events, onBack }) {
 		...events.map((event) => ({
 			title: event.title,
 			date: event.start,
+			end: event.end,
 			type: "Event",
 		})),
 	];
@@ -27,7 +32,9 @@ export default function TimelineView({ tasks, events, onBack }) {
 			<ul className={styles.list}>
 				{items.map((item, i) => (
 					<li className={styles.item} key={i}>
-						<span>{new Date(item.date).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}</span>
+						<span>
+							{item.end ? formatDate(item.date) + " to " + formatDate(item.end) : formatDate(item.date)}
+						</span>
 						<span>{item.title}</span>
 						<span>{item.type}</span>
 					</li>

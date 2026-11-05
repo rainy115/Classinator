@@ -6,10 +6,14 @@ import interactionPlugin from "@fullcalendar/react/interaction";
 import themePlugin from "@fullcalendar/react/themes/monarch"; // YOUR THEME
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import { useState } from "react";
+
+import EventForm from "../components/EventForm";
+
 import TasksDueView from "./tasks/TasksDueView";
 import TimelineView from "./timeline/TimelineView";
 
 import AddAssignmentPopup from "../components/calendar/addAssignmentPopup";
+
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
@@ -28,8 +32,13 @@ const events = [
 
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
+
+  const [showEventForm, setShowEventForm] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [tasks, setTasks] = useState(initialTasks);
+  const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
+
+
   const calendarEvents = [
     ...events,
     ...tasks.map((task) => ({
@@ -46,7 +55,7 @@ export default function Calendar() {
     ));
   }
 
-  const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
+ 
 
   if (showTimeline) {
     return <TimelineView tasks={tasks} events={events} onBack={() => setShowTimeline(false)} />;
@@ -82,14 +91,27 @@ export default function Calendar() {
       }}
     />
     {showAddMenu && (
-      <div>
-        <button onClick={() => setShowAssignmentPopup(true)}>
+      
+      <div className="add-menu">
+
+        <button onClick={() => {
+          setShowAssignmentPopup(true);
+          setShowAddMenu(false);
+        }}>
           Add Assignment
           </button>
-          <button onClick={() => alert("Add Event clciked")}>
+
+          <button onClick={() => {
+            setShowEventForm(true);
+            setShowAddMenu(false);
+          }}>
             Add Event
           </button>
+
         </div>
+    )}
+      {showEventForm && (
+        <EventForm onClose={() => setShowEventForm(false)} />
     )}
       <TasksDueView tasks={tasks} onToggleTask={toggleTask} />
     <AddAssignmentPopup

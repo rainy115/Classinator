@@ -16,3 +16,29 @@
 	border: 1px solid #dfe6e1;
 	border-radius: 5px;
 }
+
+.item span {
+	flex: 1;
+}
+
+.item span + span {
+	padding-left: 12px;
+	border-left: 1px solid #000;
+}
+
+.header {
+	font-weight: bold;
+}
+
+.backButton {
+	padding: 10px 20px;
+	border: 1px solid var(--fc-monarch-strong-border);
+	border-radius: 999px;
+	background: none;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.backButton:hover {
+	background: var(--fc-monarch-muted);
+}

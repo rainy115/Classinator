@@ -27,9 +27,14 @@ export default function TimelineView({ tasks, events, onBack }) {
 
 	return (
 		<section className={styles.timeline}>
-			<button onClick={onBack}>Back to Calendar</button>
+			<button className={styles.backButton} onClick={onBack}>Back to Calendar</button>
 			<h1>Timeline</h1>
 			<ul className={styles.list}>
+				<li className={styles.item + " " + styles.header}>
+					<span>Date/Time</span>
+					<span>Title</span>
+					<span>Type</span>
+				</li>
 				{items.map((item, i) => (
 					<li className={styles.item} key={i}>
 						<span>

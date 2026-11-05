@@ -1,0 +1,50 @@
+//Ricky - adding timeline view 
+
+"use client";
+
+import styles from "./TimelineView.module.css";
+
+function formatDate(date) {
+	return new Date(date).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" });
+}
+
+export default function TimelineView({ tasks, events, onBack }) {
+	const items = [
+		...tasks.map((task) => ({
+			title: task.course + ": " + task.title,
+			date: task.dueDate + "T23:59", // due end of day
+			type: "Assignment",
+		})),
+		...events.map((event) => ({
+			title: event.title,
+			date: event.start,
+			end: event.end,
+			type: "Event",
+		})),
+	];
+
+	items.sort((a, b) => a.date.localeCompare(b.date));
+
+	return (
+		<section className={styles.timeline}>
+			<button className={styles.backButton} onClick={onBack}>Back to Calendar</button>
+			<h1>Timeline</h1>
+			<ul className={styles.list}>
+				<li className={styles.item + " " + styles.header}>
+					<span>Date/Time</span>
+					<span>Title</span>
+					<span>Type</span>
+				</li>
+				{items.map((item, i) => (
+					<li className={styles.item} key={i}>
+						<span>
+							{item.end ? formatDate(item.date) + " to " + formatDate(item.end) : formatDate(item.date)}
+						</span>
+						<span>{item.title}</span>
+						<span>{item.type}</span>
+					</li>
+				))}
+			</ul>
+		</section>
+	);
+}

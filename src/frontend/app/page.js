@@ -1,20 +1,62 @@
 "use client";
 
 import FullCalendar from "@fullcalendar/react";
-import themePlugin from "@fullcalendar/react/themes/monarch"; // YOUR THEME
 import dayGridPlugin from "@fullcalendar/react/daygrid";
-import timeGridPlugin from "@fullcalendar/react/timegrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
+import themePlugin from "@fullcalendar/react/themes/monarch"; // YOUR THEME
+import timeGridPlugin from "@fullcalendar/react/timegrid";
 import { useState } from "react";
+
 import EventForm from "../components/EventForm";
+
+import TasksDueView from "./tasks/TasksDueView";
+
+import AddAssignmentPopup from "../components/calendar/addAssignmentPopup";
+
 // stylesheets
 import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
-import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
+import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
+
+const initialTasks = [
+  { id: 1, title: "Quiz 01", course: "CS 321", dueDate: "2026-11-04", completed: false },
+  { id: 2, title: "Homework 3", course: "MATH 213", dueDate: "2026-11-05", completed: false },
+  { id: 3, title: "Project 1", course: "CS 310", dueDate: "2026-11-07", completed: false },
+];
 
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
+
   const [showEventForm, setShowEventForm] = useState(false);
+  const [tasks, setTasks] = useState(initialTasks);
+  const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
+
+
+  const calendarEvents = [
+    {
+      title: 'Test event 1',
+      start: '2026-11-01',
+      color: "blue",
+    },
+    {
+      title: 'event2',
+      start: '2026-11-05',
+      end: '2026-11-07',
+    },
+    ...tasks.map((task) => ({
+      id: `task-${task.id}`,
+      title: `${task.course}: ${task.title}`,
+      start: task.dueDate,
+      color: task.completed ? "#9ba6a2" : "#28644f",
+    })),
+  ];
+
+  function toggleTask(taskId) {
+    setTasks((currentTasks) => currentTasks.map((task) =>
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  }
+
   return (
     <>
     <FullCalendar
@@ -25,18 +67,7 @@ export default function Calendar() {
       center: "title",
       right: "addButton,dayGridMonth,timeGridWeek,timeGridDay"
       }}
-      events= {[
-        {
-          title: 'Test event 1',
-          start: '2026-11-01',
-          color: "blue"
-        },
-        {
-          title: 'event2',
-          start: '2026-11-05',
-          end: '2026-11-07'
-        }
-      ]}
+      events={calendarEvents}
       eventClick={(info) =>{
         alert("Event: " + info.event.title) 
         // Currently displays the event title on click, change to edit assigment/ personal event
@@ -52,14 +83,17 @@ export default function Calendar() {
       }}
     />
     {showAddMenu && (
+      
       <div className="add-menu">
 
-        <button onClick={() => alert("Add Assignment clicked")}>
+        <button onClick={() => {
+          setShowAssignmentPopup(true);
+          setShowAddMenu(false);
+        }}>
           Add Assignment
           </button>
 
           <button onClick={() => {
-            console.log("Add Event clicked!");
             setShowEventForm(true);
             setShowAddMenu(false);
           }}>
@@ -69,8 +103,13 @@ export default function Calendar() {
         </div>
     )}
       {showEventForm && (
-        <EventForm onSave={handleSaveEvent} />
+        <EventForm /> //needs onSave={handleSaveEvent} tbd
     )}
+      <TasksDueView tasks={tasks} onToggleTask={toggleTask} />
+    <AddAssignmentPopup
+      isOpen={showAssignmentPopup}
+      onClose={() => setShowAssignmentPopup(false)}
+    />
   </>
   );
 } 

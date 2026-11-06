@@ -1,50 +1,73 @@
-//Ricky - adding timeline view 
+//Ricky - adding timeline view
 
 "use client";
 
 import styles from "./TimelineView.module.css";
 
-function formatDate(date) {
-	return new Date(date).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" });
+function formatDay(date) {
+	return date.toLocaleDateString("en-US", {
+		month: "short",
+		day:"numeric",
+	});
 }
 
 export default function TimelineView({ tasks, events, onBack }) {
 	const items = [
 		...tasks.map((task) => ({
-			title: task.course + ": " + task.title,
-			date: task.dueDate + "T23:59", // due end of day
-			type: "Assignment",
+			title: `${task.course}: ${task.title}`,
+			start: `${task.dueDate}T00:00`,
+			end: `${task.dueDate}T23:59`,
+			type: "assignment",
 		})),
 		...events.map((event) => ({
 			title: event.title,
-			date: event.start,
-			end: event.end,
-			type: "Event",
+			start: event.start,
+			end: event.end ||event.start,
+			type: "event",
 		})),
 	];
 
-	items.sort((a, b) => a.date.localeCompare(b.date));
+	items.sort((first, second) => first.start.localeCompare(second.start));
+
+	const firstDay = new Date(items[0].start);
+	firstDay.setHours(0,0,0,0);
+
+	const lastDay = new Date(Math.max(...items.map((item) => new Date(item.end))));
+	lastDay.setDate(lastDay.getDate() + 1);
+	lastDay.setHours(0,0,0,0);
+
+	function percent(date) {
+		return ((new Date(date) - firstDay)/(lastDay - firstDay))*100;
+
+	}
+
+	const days = [];
+	for (let day = new Date(firstDay); day < lastDay; day.setDate(day.getDate() + 1)) {
+		days.push(new Date(day));
+	}
 
 	return (
 		<section className={styles.timeline}>
 			<button className={styles.backButton} onClick={onBack}>Back to Calendar</button>
 			<h1>Timeline</h1>
-			<ul className={styles.list}>
-				<li className={styles.item + " " + styles.header}>
-					<span>Date/Time</span>
-					<span>Title</span>
-					<span>Type</span>
-				</li>
-				{items.map((item, i) => (
-					<li className={styles.item} key={i}>
-						<span>
-							{item.end ? formatDate(item.date) + " to " + formatDate(item.end) : formatDate(item.date)}
-						</span>
-						<span>{item.title}</span>
-						<span>{item.type}</span>
-					</li>
+			<div className={styles.dates}>
+				{days.map((day) => (
+					<span key={formatDay(day)} style={{ left: `${percent(day)}%` }}>
+						{formatDay(day)}
+					</span>
 				))}
-			</ul>
+			</div>
+			{items.map((item, i) => (
+				<div className={styles.row} key={i}>
+					<div
+						className={`${styles.bar} ${item.type === "assignment" ? styles.assignment : styles.event}`}
+						style={{left: `${percent(item.start)}%`, width: `${percent(item.end) - percent(item.start)}%`}}
+					>
+						{item.title}
+					</div>
+				</div>
+				
+			))}
 		</section>
 	);
 }

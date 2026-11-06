@@ -11,6 +11,13 @@ function formatDay(date) {
 	});
 }
 
+function formatTime(date){
+	return new Date(date).toLocaleString("en-US", {
+		dateStyle: "long",
+		timeStyle: "short",
+	});
+}
+
 export default function TimelineView({ tasks, events, onBack }) {
 	const items = [
 		...tasks.map((task) => ({
@@ -18,12 +25,14 @@ export default function TimelineView({ tasks, events, onBack }) {
 			start: `${task.dueDate}T00:00`,
 			end: `${task.dueDate}T23:59`,
 			type: "assignment",
+			hover: "Due " + formatTime(task.dueDate + "T23:59"),
 		})),
 		...events.map((event) => ({
 			title: event.title,
 			start: event.start,
 			end: event.end ||event.start,
 			type: "event",
+			hover: event.end ? formatTime(event.start) + " to " + formatTime(event.end) : formatTime(event.start),
 		})),
 	];
 
@@ -62,6 +71,7 @@ export default function TimelineView({ tasks, events, onBack }) {
 					<div
 						className={`${styles.bar} ${item.type === "assignment" ? styles.assignment : styles.event}`}
 						style={{left: `${percent(item.start)}%`, width: `${percent(item.end) - percent(item.start)}%`}}
+						title={item.hover}
 					>
 						{item.title}
 					</div>

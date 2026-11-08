@@ -5,6 +5,12 @@ import styles from "./EventForm.module.css";
 export default function EventForm({ onClose }) {
 
   const [title, setTitle] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [description, setDesc] = useState("");
+
+
 
   return (
 
@@ -32,17 +38,32 @@ export default function EventForm({ onClose }) {
 
 
         <label> Event Date: </label>
-          <input type="date" placeholder="Select Event Date" />
+          <input type="date" 
+          placeholder="Select Event Date" 
+          value = {eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+          />
         
         <label> Event Start Time: </label>
-          <input type="time" placeholder="Select Event Start Time" />
+          <input type="time" 
+          placeholder="Select Event Start Time" 
+          value = {startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          />
 
         <label> Event End Time: </label>
-          <input type="time" placeholder="Select Event End Time" />
+          <input type="time" 
+          placeholder="Select Event End Time" 
+          value = {endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          />
 
         <label> Event Description: </label>
-        <textarea placeholder="Enter Event Description" />
-
+        <textarea
+          placeholder="Enter Event Description"
+          value={description}
+          onChange={(e) => setDesc(e.target.value)}
+        />
         <button className={styles.saveButton} type="submit">Save Event</button>
 
       </form>

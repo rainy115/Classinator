@@ -11,6 +11,35 @@ export default function EventForm({ onClose }) {
   const [description, setDesc] = useState("");
 
 
+const handleSubmit = async (e) =>
+{
+	e.preventDefault();
+  const start = `${eventDate}T${startTime}`;
+  const end = `${eventDate}T${endTime}`;
+
+  const eventData = {
+	  title: title,
+	  start: start,
+	  end: end,
+  	description: description
+  };
+
+  const response = await fetch("/api/events", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(eventData)
+  });
+
+  if (!response.ok)
+  {
+    throw new Error("Failed to save event");
+  }
+  
+  onClose();
+};
+
 
   return (
 
@@ -26,7 +55,7 @@ export default function EventForm({ onClose }) {
         <div className={styles.popup}>
       <h2>Add Event</h2>
 
-      <form className={styles.form}> 
+      <form className={styles.form} onSubmit={handleSubmit}> 
 
         <label> Event Name: </label>
           <input
@@ -64,6 +93,7 @@ export default function EventForm({ onClose }) {
           value={description}
           onChange={(e) => setDesc(e.target.value)}
         />
+
         <button className={styles.saveButton} type="submit">Save Event</button>
 
       </form>

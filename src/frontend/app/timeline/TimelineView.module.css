@@ -3,33 +3,48 @@
 	padding: 20px;
 }
 
-.list {
-	padding: 0;
-	list-style: none;
-}
-
-.item {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 9px;
-	padding: 12px 16px;
-	border: 1px solid #dfe6e1;
-	border-radius: 5px;
-}
-
-.item span {
-	flex: 1;
-}
-
-.item span + span {
-	padding-left: 12px;
-	border-left: 1px solid #000;
-}
-
-.header {
-	font-weight: bold;
+.dates {
+	position: relative;
+	height: 32px;
+	margin-top: 14px;
+	border-radius: 4px;
 	background: #245c4b;
 	color: #fff;
+	font-size: 13px;
+}
+
+.dates span {
+	position: absolute;
+	padding-left: 6px;
+	line-height: 32px;
+	border-left: 1px solid #fff;
+}
+
+.row {
+	position: relative;
+	height: 40px;
+	border-bottom: 1px solid #dfe6e1;
+}
+
+.bar {
+	position: absolute;
+	top: 8px;
+	min-width: 100px;
+	padding: 0 8px;
+	border-radius: 4px;
+	color: #fff;
+	font-size: 13px;
+	line-height: 24px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.assignment {
+	background: #28644f;
+}
+
+.event {
+	background: var(--fc-monarch-primary);
 }
 
 .backButton {

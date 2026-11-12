@@ -1,30 +1,22 @@
-import { getDatabase } from "../../../lib/mongodb";
+import { createAssignmentApi } from "../../../assignment/createAssignmentApi";
 
-export async function GET(request)
-{
-    const db = await getDatabase();
-
-    const assignmentsCollection = db.collection("assignments");
-	const assignments = await assignmentsCollection.find({}).toArray();
-
-	return Response.json(assignments);
+export async function GET() {
+  try {
+    const assignments = await createAssignmentApi().list();
+    return Response.json(assignments.map((assignment) => assignment.toJSON()));
+  } catch (error) {
+    console.error("Unable to load assignments:", error);
+    return Response.json({ error: "Unable to load assignments." }, { status: 500 });
+  }
 }
-export async function POST(request)
-{
-	const data = await request.json();
 
-	if (!data.title?.trim() || !data.dueDate || Number.isNaN(Date.parse(data.dueDate)))
-	{
-		return Response.json(
-			{ error: "Invalid assignment name/date" },
-			{ status: 400 }
-		);
-	}
-
-	const db = await getDatabase();
-	const assignmentsCollection = db.collection("assignments");
-
-	const result = await assignmentsCollection.insertOne(data);
-
-	return Response.json(result, { status: 201 });
+export async function POST(request) {
+  try {
+    const input = await request.json();
+    const assignment = await createAssignmentApi().create(input);
+    return Response.json(assignment.toJSON(), { status: 201 });
+  } catch (error) {
+    console.error("Unable to create assignment:", error);
+    return Response.json({ error: "Unable to create assignment." }, { status: 500 });
+  }
 }

@@ -1,8 +1,11 @@
-//Ricky - adding timeline view
+//Ricky - timeline view UI logic
 
 "use client";
 
+import { useState } from "react";
+
 import styles from "./TimelineView.module.css";
+import TimelineService from "../../timeline/TimelineService";
 
 function formatDay(date) {
 	return date.toLocaleDateString("en-US", {
@@ -11,73 +14,54 @@ function formatDay(date) {
 	});
 }
 
-function formatTime(date){
-	return new Date(date).toLocaleString("en-US", {
-		dateStyle: "long",
-		timeStyle: "short",
-	});
+function getToday() {
+	const today = new Date();
+	const month = String(today.getMonth() + 1).padStart(2, "0");
+	const day = String(today.getDate()).padStart(2, "0");
+	return `${today.getFullYear()}-${month}-${day}`;
 }
 
 export default function TimelineView({ tasks, events, onBack }) {
-	const items = [
-		...tasks.map((task) => ({
-			title: `${task.course}: ${task.title}`,
-			start: `${task.dueDate}T00:00`,
-			end: `${task.dueDate}T23:59`,
-			type: "assignment",
-			hover: "Due " + formatTime(task.dueDate + "T23:59"),
-		})),
-		...events.map((event) => ({
-			title: event.title,
-			start: event.start,
-			end: event.end ||event.start,
-			type: "event",
-			hover: event.end ? formatTime(event.start) + " to " + formatTime(event.end) : formatTime(event.start),
-		})),
-	];
+	const [fromDate, setFromDate] = useState(getToday());
+	const [toDate, setToDate] = useState("");
 
-	items.sort((first, second) => first.start.localeCompare(second.start));
-
-	const firstDay = new Date(items[0].start);
-	firstDay.setHours(0,0,0,0);
-
-	const lastDay = new Date(Math.max(...items.map((item) => new Date(item.end))));
-	lastDay.setDate(lastDay.getDate() + 1);
-	lastDay.setHours(0,0,0,0);
-
-	function percent(date) {
-		return ((new Date(date) - firstDay)/(lastDay - firstDay))*100;
-
-	}
-
-	const days = [];
-	for (let day = new Date(firstDay); day < lastDay; day.setDate(day.getDate() + 1)) {
-		days.push(new Date(day));
-	}
+	const timeline = new TimelineService(tasks, events, fromDate, toDate);
 
 	return (
 		<section className={styles.timeline}>
 			<button className={styles.backButton} onClick={onBack}>Back to Calendar</button>
 			<h1>Timeline</h1>
-			<div className={styles.dates}>
-				{days.map((day) => (
-					<span key={formatDay(day)} style={{ left: `${percent(day)}%` }}>
-						{formatDay(day)}
-					</span>
-				))}
+
+			<div className={styles.range}>
+				<label>From <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} /></label>
+				<label>To <input type="date" value={toDate} min={fromDate} onChange={(e) => setToDate(e.target.value)} /></label>
 			</div>
-			{items.map((item, i) => (
-				<div className={styles.row} key={i}>
-					<div
-						className={`${styles.bar} ${item.type === "assignment" ? styles.assignment : styles.event}`}
-						style={{left: `${percent(item.start)}%`, width: `${percent(item.end) - percent(item.start)}%`}}
-						title={item.hover}
-					>
-						{item.title}
+
+			{timeline.isEmpty() && <p>Nothing scheduled between these dates.</p>}
+
+			{!timeline.isEmpty() &&(
+				<>
+					<div className={styles.dates}>
+						{timeline.getDays().map((day) => (
+							<span key={formatDay(day)} style={{ left: `${timeline.getPercent(day)}%` }}>
+								{formatDay(day)}
+							</span>
+						))}
 					</div>
-				</div>
-				
-			))}
+					{timeline.items.map((item, i) => (
+						<div className={styles.row} key={i}>
+							<div
+								className={`${styles.bar} ${item.type === "assignment" ? styles.assignment : styles.event}`}
+								style={{left: `${timeline.getPercent(item.start)}%`, width: `${timeline.getPercent(item.end) - timeline.getPercent(item.start)}%`}}
+								title={item.hover}
+							>
+								{item.title}
+							</div>
+						</div>
+					))}
+				</>
+			)}
+			
 		</section>
 	);
 }

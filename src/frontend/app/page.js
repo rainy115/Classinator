@@ -20,14 +20,14 @@ import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 
 const events = [
-  { title: 'Test event 1', start: '2026-11-01T10:00', color: "blue" },
-  { title: 'event2', start: '2026-11-05T09:00', end: '2026-11-07T17:00' },
+  { title: 'Test event 1', start: '2026-11-13T10:00', color: "blue" },
+  { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
 ];
 
 const initialTasks = [
-  { id: 1, title: "Quiz 01", course: "CS 321", dueDate: "2026-11-04", completed: false },
-  { id: 2, title: "Homework 3", course: "MATH 213", dueDate: "2026-11-05", completed: false },
-  { id: 3, title: "Project 1", course: "CS 310", dueDate: "2026-11-07", completed: false },
+  { id: 1, title: "Quiz 01", course: "CS 321", dueDate: "2026-11-16", completed: false },
+  { id: 2, title: "Homework 3", course: "MATH 213", dueDate: "2026-11-17", completed: false },
+  { id: 3, title: "Project 1", course: "CS 310", dueDate: "2026-11-19", completed: false },
 ];
 
 function toTask(assignment) {
@@ -116,7 +116,7 @@ export default function Calendar() {
  
 
   if (showTimeline) {
-    return <TimelineView tasks={tasks} events={events} onBack={() => setShowTimeline(false)} />;
+    return <TimelineView tasks={[...tasks, ...assignments]} events={events} onBack={() => setShowTimeline(false)} />;
   }
 
   return (

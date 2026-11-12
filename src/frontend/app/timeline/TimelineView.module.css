@@ -3,6 +3,12 @@
 	padding: 20px;
 }
 
+.range {
+	display: flex;
+	gap: 16px;
+	margin: 10px 0;
+}
+
 .dates {
 	position: relative;
 	height: 32px;

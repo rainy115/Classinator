@@ -116,7 +116,7 @@ export default function Calendar() {
  
 
   if (showTimeline) {
-    return <TimelineView tasks={tasks} events={events} onBack={() => setShowTimeline(false)} />;
+    return <TimelineView tasks={[...tasks, ...assignments]} events={events} onBack={() => setShowTimeline(false)} />;
   }
 
   return (

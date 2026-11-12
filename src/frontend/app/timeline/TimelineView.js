@@ -18,25 +18,44 @@ function formatTime(date){
 	});
 }
 
+function isValid(date){
+	return !isNaN(new Date(date));
+}
+
+function getDueTime(task){
+	return task.dueAt?.includes("T") ? task.dueAt : task.dueDate + "T23:59";
+}
+
 export default function TimelineView({ tasks, events, onBack }) {
 	const items = [
 		...tasks.map((task) => ({
 			title: `${task.course}: ${task.title}`,
 			start: `${task.dueDate}T00:00`,
-			end: `${task.dueDate}T23:59`,
+			end: getDueTime(task),
 			type: "assignment",
-			hover: "Due " + formatTime(task.dueDate + "T23:59"),
+			hover: "Due " + formatTime(getDueTime(task) ),
 		})),
 		...events.map((event) => ({
 			title: event.title,
 			start: event.start,
-			end: event.end ||event.start,
+			end: isValid(event.end)? event.end : event.start,
 			type: "event",
-			hover: event.end ? formatTime(event.start) + " to " + formatTime(event.end) : formatTime(event.start),
+			hover: isValid(event.end)? formatTime(event.start) + " to " + formatTime(event.end) : formatTime(event.start),
 		})),
-	];
+	].filter((item) => isValid(item.start));
 
 	items.sort((first, second) => first.start.localeCompare(second.start));
+
+	if (items.length === 0) {
+		return (
+			<section className={styles.timeline}>
+				<button className={styles.backButton} onClick={onBack}>Back to Calendar</button>
+				<h1>Timeline</h1>
+				<p>Nothing scheduled yet.</p>
+			</section>
+			
+		);
+	}
 
 	const firstDay = new Date(items[0].start);
 	firstDay.setHours(0,0,0,0);

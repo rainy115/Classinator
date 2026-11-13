@@ -19,10 +19,14 @@ import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 
+
+
 const events = [
   { title: 'Test event 1', start: '2026-11-13T10:00', color: "blue" },
   { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
 ];
+
+
 
 function toTask(assignment) {
   const dueAt = assignment.dueDate ?? "";
@@ -35,16 +39,23 @@ function toTask(assignment) {
   };
 }
 
+
+
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
 
   const [showEventForm, setShowEventForm] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [assignments, setAssignments] = useState([]);
+
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
   const [assignmentError, setAssignmentError] = useState("");
+  const [personalEvents, setPersonalEvents] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
+
+
 
   useEffect(() => {
     let active = true;
@@ -63,12 +74,42 @@ export default function Calendar() {
       .finally(() => {
         if (active) setIsLoadingAssignments(false);
       });
+    
+      fetch("/api/events")
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Unable to load events.");
+      return result;
+    })
+    .then((events) => {
+      if (active) setPersonalEvents(events);
+    })
+    .catch((error) => {
+      if (active) console.error("Unable to load events:", error);
+    });
+
     return () => { active = false; };
   }, []);
 
 
+
+
+
   const calendarEvents = [
     ...events,
+
+    ...personalEvents
+      .filter((event) =>
+        event.title && !Number.isNaN(Date.parse(event.start))
+      )
+      .map((event) => ({
+        id: event._id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        color: "#28644f",
+      })),
+
     ...assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
       title: `${assignment.course}: ${assignment.title}`,
@@ -76,6 +117,10 @@ export default function Calendar() {
       color: assignment.completed ? "#9ba6a2" : "#28644f",
     })),
   ];
+
+
+
+
 
   async function toggleTask(assignmentId) {
     const assignment = assignments.find((item) => item.id === assignmentId);
@@ -100,6 +145,9 @@ export default function Calendar() {
     }
   }
 
+
+
+
   function handleAssignmentSaved(assignment) {
     const savedTask = toTask(assignment);
     setAssignmentError("");
@@ -110,6 +158,29 @@ export default function Calendar() {
     });
   }
 
+
+
+  // reload events so the calendar shows the latest changes
+  async function handleEventSaved() {
+  try {
+    const response = await fetch("/api/events");
+
+    if (!response.ok) {
+      throw new Error("Failed to load saved events");
+    }
+
+    const events = await response.json();
+
+    setPersonalEvents(events);
+    setShowEventForm(false);
+  } catch (error) {
+    console.error("Unable to refresh events:", error);
+  }
+}
+
+
+
+// open the rihht form when a calendar event is clicked
   function handleCalendarEventClick(info) {
     const assignmentId = info.event.id.startsWith("assignment-")
       ? info.event.id.slice("assignment-".length)
@@ -120,6 +191,17 @@ export default function Calendar() {
       setShowAssignmentPopup(true);
       return;
     }
+
+    const personalEvent = personalEvents.find(
+      (event) => String(event._id) === info.event.id
+    );
+
+    if (personalEvent) {
+      setEditingEvent(personalEvent);
+      setShowEventForm(true);
+      return;
+    }
+
     alert("Event: " + info.event.title);
   }
 
@@ -170,14 +252,19 @@ export default function Calendar() {
           <button onClick={() => {
             setShowEventForm(true);
             setShowAddMenu(false);
+            setEditingEvent(null);
           }}>
             Add Event
           </button>
 
         </div>
     )}
+
+
       {showEventForm && (
-        <EventForm onClose={() => setShowEventForm(false)} />
+        <EventForm onClose={() => setShowEventForm(false)} 
+        onSaved={handleEventSaved} 
+        initialEvent={editingEvent} />
     )}
       <TasksDueView
         tasks={assignments}

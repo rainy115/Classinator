@@ -197,6 +197,20 @@
   justify-content: flex-end;
 }
 
+.errorMessage,
+.errorList {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.errorList {
+  display: grid;
+  gap: 4px;
+  padding-left: 22px;
+}
+
 .saveButton {
   min-height: 40px;
   border: 1px solid #245c4b;

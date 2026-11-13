@@ -1,25 +1,24 @@
 import Assignment from "./Assignment";
+import AssignmentValidator from "./AssignmentValidator";
 
 export class AssignmentValidationError extends Error {
-  constructor(message) {
-    super(message);
+  constructor(errors) {
+    super("Assignment data is invalid.");
     this.name = "AssignmentValidationError";
-  }
-}
-
-function validateAssignment(input) {
-  if (typeof input.title !== "string" || !input.title.trim()) {
-    throw new AssignmentValidationError("Assignment name is required.");
-  }
-
-  if (typeof input.dueDate !== "string" || !input.dueDate || Number.isNaN(Date.parse(input.dueDate))) {
-    throw new AssignmentValidationError("A valid due date is required.");
+    this.errors = errors;
   }
 }
 
 export default class AssignmentService {
-  constructor(repository) {
+  constructor(repository, validator = new AssignmentValidator()) {
     this.repository = repository;
+    this.validator = validator;
+  }
+
+  validateInput(input) {
+    const result = this.validator.validate(input);
+    if (!result.valid) throw new AssignmentValidationError(result.errors);
+    return result.value;
   }
 
   async listAssignments() {
@@ -37,11 +36,10 @@ export default class AssignmentService {
   }
 
   async createAssignment(input) {
-    validateAssignment(input);
+    const values = this.validateInput(input);
     const now = new Date();
     const assignment = new Assignment({
-      ...input,
-      title: input.title.trim(),
+      ...values,
       createdAt: now,
       updatedAt: now,
     });
@@ -56,14 +54,13 @@ export default class AssignmentService {
       ...existing.toJSON(),
       ...input,
       id,
-      title: typeof input.title === "string" ? input.title.trim() : existing.title,
       completed: typeof input.completed === "boolean" ? input.completed : existing.completed,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
     };
-    validateAssignment(updatedData);
+    const values = this.validateInput(updatedData);
 
-    const assignment = new Assignment(updatedData);
+    const assignment = new Assignment({ ...values, id, completed: updatedData.completed });
     return this.repository.update(id, assignment);
   }
 }

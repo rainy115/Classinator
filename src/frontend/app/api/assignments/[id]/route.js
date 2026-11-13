@@ -27,7 +27,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     console.error("Unable to update assignment:", error);
     if (error instanceof AssignmentValidationError) {
-      return Response.json({ error: error.message }, { status: 400 });
+      return Response.json(
+        { error: error.message, fieldErrors: error.errors },
+        { status: 400 },
+      );
     }
     return Response.json({ error: "Unable to update assignment." }, { status: 500 });
   }

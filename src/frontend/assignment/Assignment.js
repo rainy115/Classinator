@@ -1,18 +1,17 @@
+import Course from "./Course";
+import StudySchedule from "./StudySchedule";
+
 /** Domain model for an assignment saved by a student. */
 export default class Assignment {
   constructor(data = {}) {
     this.id = data.id ?? data._id?.toString?.() ?? null;
     this.title = data.title?.trim?.() ?? "";
-    this.courseId = data.courseId ?? data.course ?? "";
-    this.courseName = data.courseName ?? data.course ?? "";
-    this.course = this.courseName;
+    this.course = Course.from(data.course, data.courseId, data.courseName);
     this.description = data.description ?? "";
     this.dueDate = data.dueDate;
     this.priority = data.priority ?? "Medium";
     this.difficulty = Number(data.difficulty ?? 5);
-    this.repeat = Boolean(data.repeat);
-    this.hoursPerDay = this.repeat ? data.hoursPerDay ?? null : null;
-    this.frequencyDays = this.repeat ? data.frequencyDays ?? null : null;
+    this.studySchedule = StudySchedule.fromAssignmentData(data);
     this.notes = data.notes ?? "";
     this.completed = Boolean(data.completed);
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
@@ -22,16 +21,15 @@ export default class Assignment {
   toDocument() {
     return {
       title: this.title,
-      course: this.course,
-      courseId: this.courseId,
-      courseName: this.courseName,
+      course: this.course?.name ?? "",
+      courseId: this.course?.id ?? null,
       description: this.description,
       dueDate: this.dueDate,
       priority: this.priority,
       difficulty: this.difficulty,
-      repeat: this.repeat,
-      hoursPerDay: this.hoursPerDay,
-      frequencyDays: this.frequencyDays,
+      repeat: this.studySchedule.enabled,
+      hoursPerDay: this.studySchedule.hoursPerDay,
+      frequencyDays: this.studySchedule.frequencyDays,
       notes: this.notes,
       completed: this.completed,
       createdAt: this.createdAt,
@@ -43,6 +41,7 @@ export default class Assignment {
     return {
       id: this.id,
       ...this.toDocument(),
+      courseName: this.course?.name ?? "",
     };
   }
 }

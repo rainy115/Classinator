@@ -5,7 +5,7 @@ import styles from "./addAssignmentPopup.module.css";
 
 const EMPTY_FORM = {
   title: "",
-  course: "sample-1",
+  course: "",
   description: "",
   dueDate: "",
   dueTime: "",
@@ -22,7 +22,7 @@ function toFormValues(assignment) {
   const [dueDate = "", dueTime = ""] = (assignment.dueAt ?? assignment.dueDate ?? "").split("T");
   return {
     title: assignment.title ?? "",
-    course: assignment.courseId ?? assignment.course ?? "sample-1",
+    course: assignment.courseId ?? assignment.course ?? "",
     description: assignment.description ?? "",
     dueDate,
     dueTime: dueTime.slice(0, 5),
@@ -60,11 +60,13 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
   const [notes, setNotes] = useState(() => initialValues.notes);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   
   const handleSave = async (event) => {
     event.preventDefault();
     setIsSaving(true);
     setErrorMessage("");
+    setFieldErrors({});
 
     const assignmentData = {
       title,
@@ -91,6 +93,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
       );
       const result = await response.json();
       if (!response.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
         throw new Error(result.error ?? "Unable to save assignment.");
       }
       onSaved?.(result);
@@ -126,10 +129,14 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           <label className={styles.row}>
             <span>Course Name</span>
             <select
+              required
               value={course}
               onChange={(e) => setCourse(e.target.value)}
             >
-              {!['sample-1', 'sample-2'].includes(course) && <option value={course}>{course}</option>}
+              <option value="" disabled>(select a course)</option>
+              {course && !["sample-1", "sample-2"].includes(course) && (
+                <option value={course}>{course}</option>
+              )}
               <option value="sample-1">Sample 1</option>
               <option value="sample-2">Sample 2</option>
             </select>
@@ -241,7 +248,18 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
             />
           </label>
 
-          {errorMessage && <p role="alert">{errorMessage}</p>}
+          {errorMessage && (
+            <p className={styles.errorMessage} role="alert">
+              {errorMessage}
+            </p>
+          )}
+          {Object.entries(fieldErrors).length > 0 && (
+            <ul className={styles.errorList} role="alert">
+              {Object.entries(fieldErrors).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
+          )}
           <div className={styles.actions}>
             <button className={styles.saveButton} type="submit" disabled={isSaving}>
               {isSaving ? "Saving…" : initialAssignment ? "Save Changes" : "Create Assignment"}

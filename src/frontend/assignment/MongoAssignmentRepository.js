@@ -11,7 +11,7 @@ export default class MongoAssignmentRepository extends AssignmentRepository {
 
   async findAll() {
     const collection = await this.collection();
-    const documents = await collection.find({}).sort({ dueDate: 1 }).toArray();
+    const documents = await collection.find({}).toArray();
     return documents.map((document) => new Assignment(document));
   }
 

@@ -117,6 +117,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           <label className={styles.row}>
             <span>Assignment Name</span>
             <input type="text"
+                required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -149,6 +150,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+                required
             />
           </label>
 

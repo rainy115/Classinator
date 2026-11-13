@@ -1,3 +1,4 @@
+import { AssignmentValidationError } from "../../../../assignment/AssignmentService";
 import { createAssignmentApi } from "../../../../assignment/createAssignmentApi";
 
 export async function GET(_request, { params }) {
@@ -25,6 +26,9 @@ export async function PUT(request, { params }) {
     return Response.json(assignment.toJSON());
   } catch (error) {
     console.error("Unable to update assignment:", error);
+    if (error instanceof AssignmentValidationError) {
+      return Response.json({ error: error.message }, { status: 400 });
+    }
     return Response.json({ error: "Unable to update assignment." }, { status: 500 });
   }
 }

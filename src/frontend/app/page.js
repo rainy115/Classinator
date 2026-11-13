@@ -24,12 +24,6 @@ const events = [
   { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
 ];
 
-const initialTasks = [
-  { id: 1, title: "Quiz 01", course: "CS 321", dueDate: "2026-11-16", completed: false },
-  { id: 2, title: "Homework 3", course: "MATH 213", dueDate: "2026-11-17", completed: false },
-  { id: 3, title: "Project 1", course: "CS 310", dueDate: "2026-11-19", completed: false },
-];
-
 function toTask(assignment) {
   const dueAt = assignment.dueDate ?? "";
   return {
@@ -46,8 +40,9 @@ export default function Calendar() {
 
   const [showEventForm, setShowEventForm] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
-  const [tasks, setTasks] = useState(initialTasks);
   const [assignments, setAssignments] = useState([]);
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
+  const [assignmentError, setAssignmentError] = useState("");
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
 
@@ -63,7 +58,10 @@ export default function Calendar() {
         if (active) setAssignments(assignments.map(toTask));
       })
       .catch((error) => {
-        if (active) console.error("Unable to load calendar assignments:", error);
+        if (active) setAssignmentError(error.message || "Unable to load assignments.");
+      })
+      .finally(() => {
+        if (active) setIsLoadingAssignments(false);
       });
     return () => { active = false; };
   }, []);
@@ -71,12 +69,6 @@ export default function Calendar() {
 
   const calendarEvents = [
     ...events,
-    ...tasks.map((task) => ({
-      id: `task-${task.id}`,
-      title: `${task.course}: ${task.title}`,
-      start: task.dueAt || task.dueDate,
-      color: task.completed ? "#9ba6a2" : "#28644f",
-    })),
     ...assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
       title: `${assignment.course}: ${assignment.title}`,
@@ -85,14 +77,32 @@ export default function Calendar() {
     })),
   ];
 
-  function toggleTask(taskId) {
-    setTasks((currentTasks) => currentTasks.map((task) =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+  async function toggleTask(assignmentId) {
+    const assignment = assignments.find((item) => item.id === assignmentId);
+    if (!assignment) return;
+
+    setAssignmentError("");
+    try {
+      const response = await fetch(`/api/assignments/${assignmentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !assignment.completed }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Unable to update assignment.");
+
+      const updatedAssignment = toTask(result);
+      setAssignments((currentAssignments) => currentAssignments.map((item) =>
+        item.id === assignmentId ? updatedAssignment : item
+      ));
+    } catch (error) {
+      setAssignmentError(error.message || "Unable to update assignment.");
+    }
   }
 
   function handleAssignmentSaved(assignment) {
     const savedTask = toTask(assignment);
+    setAssignmentError("");
     setAssignments((currentAssignments) => {
       const existingIndex = currentAssignments.findIndex((item) => item.id === savedTask.id);
       if (existingIndex === -1) return [...currentAssignments, savedTask];
@@ -116,7 +126,7 @@ export default function Calendar() {
  
 
   if (showTimeline) {
-    return <TimelineView tasks={[...tasks, ...assignments]} events={events} onBack={() => setShowTimeline(false)} />;
+    return <TimelineView tasks={assignments} events={events} onBack={() => setShowTimeline(false)} />;
   }
 
   return (
@@ -169,7 +179,12 @@ export default function Calendar() {
       {showEventForm && (
         <EventForm onClose={() => setShowEventForm(false)} />
     )}
-      <TasksDueView tasks={tasks} onToggleTask={toggleTask} />
+      <TasksDueView
+        tasks={assignments}
+        isLoading={isLoadingAssignments}
+        error={assignmentError}
+        onToggleTask={toggleTask}
+      />
     <AddAssignmentPopup
       isOpen={showAssignmentPopup}
       initialAssignment={editingAssignment}

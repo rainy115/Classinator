@@ -1,3 +1,4 @@
+import { AssignmentValidationError } from "../../../assignment/AssignmentService";
 import { createAssignmentApi } from "../../../assignment/createAssignmentApi";
 
 export async function GET() {
@@ -17,6 +18,9 @@ export async function POST(request) {
     return Response.json(assignment.toJSON(), { status: 201 });
   } catch (error) {
     console.error("Unable to create assignment:", error);
+    if (error instanceof AssignmentValidationError) {
+      return Response.json({ error: error.message }, { status: 400 });
+    }
     return Response.json({ error: "Unable to create assignment." }, { status: 500 });
   }
 }

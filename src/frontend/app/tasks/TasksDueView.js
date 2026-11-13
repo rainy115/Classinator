@@ -10,7 +10,7 @@ function formatDueDate(dateString) {
 	});
 }
 
-export default function TasksDueView({ tasks, onToggleTask }) {
+export default function TasksDueView({ tasks, isLoading, error, onToggleTask }) {
 	const sortedTasks = [...tasks].sort((first, second) =>
 		first.dueDate.localeCompare(second.dueDate)
 	);
@@ -18,6 +18,11 @@ export default function TasksDueView({ tasks, onToggleTask }) {
 	return (
 		<section className={styles.deadlines}>
 			<h1 className={styles.heading}>Upcoming Deadlines</h1>
+			{error && <p className={styles.message} role="alert">{error}</p>}
+			{!error && isLoading && <p className={styles.message} role="status">Loading assignments...</p>}
+			{!error && !isLoading && sortedTasks.length === 0 && (
+				<p className={styles.message}>No upcoming assignments.</p>
+			)}
 			<ul className={styles.list}>
 				{sortedTasks.map((task) => (
 					<li className={styles.task} key={task.id}>

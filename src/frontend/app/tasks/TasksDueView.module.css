@@ -17,6 +17,12 @@
 	text-align: left;
 }
 
+.message {
+	margin: 0 0 12px;
+	color: #46564e;
+	font-size: 13px;
+}
+
 .list {
 	display: grid;
 	width: 100%;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./EventForm.module.css";
-export default function EventForm({ onClose }) {
+export default function EventForm({ onClose, onSaved }) {
 
   const [title, setTitle] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -37,7 +37,8 @@ const handleSubmit = async (e) =>
     throw new Error("Failed to save event");
   }
   
-  onClose();
+  const savedEvent = await response.json();
+  onSaved(savedEvent);
 };
 
 

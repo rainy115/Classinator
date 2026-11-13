@@ -41,8 +41,10 @@ export default function Calendar() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [assignments, setAssignments] = useState([]);
+
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
   const [assignmentError, setAssignmentError] = useState("");
+  const [personalEvents, setPersonalEvents] = useState([]);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
 
@@ -63,12 +65,39 @@ export default function Calendar() {
       .finally(() => {
         if (active) setIsLoadingAssignments(false);
       });
+    
+      fetch("/api/events")
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Unable to load events.");
+      return result;
+    })
+    .then((events) => {
+      if (active) setPersonalEvents(events);
+    })
+    .catch((error) => {
+      if (active) console.error("Unable to load events:", error);
+    });
+
     return () => { active = false; };
   }, []);
 
 
   const calendarEvents = [
     ...events,
+
+    ...personalEvents
+      .filter((event) =>
+        event.title && !Number.isNaN(Date.parse(event.start))
+      )
+      .map((event) => ({
+        id: event._id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        color: "#28644f",
+      })),
+
     ...assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
       title: `${assignment.course}: ${assignment.title}`,
@@ -77,6 +106,8 @@ export default function Calendar() {
     })),
   ];
 
+
+  
   async function toggleTask(assignmentId) {
     const assignment = assignments.find((item) => item.id === assignmentId);
     if (!assignment) return;
@@ -109,6 +140,25 @@ export default function Calendar() {
       return currentAssignments.map((item) => item.id === savedTask.id ? savedTask : item);
     });
   }
+
+  
+  async function handleEventSaved() {
+  try {
+    const response = await fetch("/api/events");
+
+    if (!response.ok) {
+      throw new Error("Failed to load saved events");
+    }
+
+    const events = await response.json();
+
+    setPersonalEvents(events);
+    setShowEventForm(false);
+  } catch (error) {
+    console.error("Unable to refresh events:", error);
+  }
+}
+
 
   function handleCalendarEventClick(info) {
     const assignmentId = info.event.id.startsWith("assignment-")
@@ -177,7 +227,8 @@ export default function Calendar() {
         </div>
     )}
       {showEventForm && (
-        <EventForm onClose={() => setShowEventForm(false)} />
+        <EventForm onClose={() => setShowEventForm(false)} 
+        onSaved={handleEventSaved} />
     )}
       <TasksDueView
         tasks={assignments}

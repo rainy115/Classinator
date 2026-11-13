@@ -2,13 +2,25 @@
 
 import { useState } from "react";
 import styles from "./EventForm.module.css";
-export default function EventForm({ onClose, onSaved }) {
+export default function EventForm({ onClose, onSaved, initialEvent }) {
 
-  const [title, setTitle] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [description, setDesc] = useState("");
+  const [title, setTitle] = useState(initialEvent?.title ?? "");
+
+  const [eventDate, setEventDate] = useState(
+    initialEvent?.start?.slice(0, 10) ?? ""
+  );
+
+  const [startTime, setStartTime] = useState(
+    initialEvent?.start?.slice(11, 16) ?? ""
+  );
+
+  const [endTime, setEndTime] = useState(
+    initialEvent?.end?.slice(11, 16) ?? ""
+  );
+
+  const [description, setDesc] = useState(
+    initialEvent?.description ?? ""
+  );
 
 
 const handleSubmit = async (e) =>
@@ -24,13 +36,24 @@ const handleSubmit = async (e) =>
   	description: description
   };
 
+
+
+  const isEditing = Boolean(initialEvent?._id);
+
   const response = await fetch("/api/events", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(eventData)
-  });
+  method: isEditing ? "PATCH" : "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(
+    isEditing
+      ? { ...eventData, id: initialEvent._id }
+      : eventData
+  )
+});
+
+
+
 
   if (!response.ok)
   {
@@ -54,7 +77,7 @@ const handleSubmit = async (e) =>
     }>
 
         <div className={styles.popup}>
-      <h2>Add Event</h2>
+      <h2>{initialEvent ? "Edit Event" : "Add Event"}</h2>
 
       <form className={styles.form} onSubmit={handleSubmit}> 
 
@@ -95,7 +118,9 @@ const handleSubmit = async (e) =>
           onChange={(e) => setDesc(e.target.value)}
         />
 
-        <button className={styles.saveButton} type="submit">Save Event</button>
+        <button className={styles.saveButton} type="submit">
+          {initialEvent ? "Update Event" : "Save Event"}
+        </button>
 
       </form>
     </div>

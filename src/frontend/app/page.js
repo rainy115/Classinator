@@ -19,10 +19,14 @@ import '@fullcalendar/react/skeleton.css'; // ALWAYS NEED SKELETON
 import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S PALETTE
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 
+
+
 const events = [
   { title: 'Test event 1', start: '2026-11-13T10:00', color: "blue" },
   { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
 ];
+
+
 
 function toTask(assignment) {
   const dueAt = assignment.dueDate ?? "";
@@ -35,6 +39,8 @@ function toTask(assignment) {
   };
 }
 
+
+
 export default function Calendar() {
   const [showAddMenu, setShowAddMenu] = useState(false);
 
@@ -45,8 +51,11 @@ export default function Calendar() {
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
   const [assignmentError, setAssignmentError] = useState("");
   const [personalEvents, setPersonalEvents] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
+
+
 
   useEffect(() => {
     let active = true;
@@ -83,6 +92,9 @@ export default function Calendar() {
   }, []);
 
 
+
+
+
   const calendarEvents = [
     ...events,
 
@@ -107,7 +119,9 @@ export default function Calendar() {
   ];
 
 
-  
+
+
+
   async function toggleTask(assignmentId) {
     const assignment = assignments.find((item) => item.id === assignmentId);
     if (!assignment) return;
@@ -131,6 +145,9 @@ export default function Calendar() {
     }
   }
 
+
+
+
   function handleAssignmentSaved(assignment) {
     const savedTask = toTask(assignment);
     setAssignmentError("");
@@ -141,7 +158,9 @@ export default function Calendar() {
     });
   }
 
-  
+
+
+  // reload events so the calendar shows the latest changes
   async function handleEventSaved() {
   try {
     const response = await fetch("/api/events");
@@ -160,6 +179,8 @@ export default function Calendar() {
 }
 
 
+
+// open the rihht form when a calendar event is clicked
   function handleCalendarEventClick(info) {
     const assignmentId = info.event.id.startsWith("assignment-")
       ? info.event.id.slice("assignment-".length)
@@ -170,6 +191,17 @@ export default function Calendar() {
       setShowAssignmentPopup(true);
       return;
     }
+
+    const personalEvent = personalEvents.find(
+      (event) => String(event._id) === info.event.id
+    );
+
+    if (personalEvent) {
+      setEditingEvent(personalEvent);
+      setShowEventForm(true);
+      return;
+    }
+
     alert("Event: " + info.event.title);
   }
 
@@ -220,15 +252,19 @@ export default function Calendar() {
           <button onClick={() => {
             setShowEventForm(true);
             setShowAddMenu(false);
+            setEditingEvent(null);
           }}>
             Add Event
           </button>
 
         </div>
     )}
+
+
       {showEventForm && (
         <EventForm onClose={() => setShowEventForm(false)} 
-        onSaved={handleEventSaved} />
+        onSaved={handleEventSaved} 
+        initialEvent={editingEvent} />
     )}
       <TasksDueView
         tasks={assignments}

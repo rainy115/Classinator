@@ -20,8 +20,8 @@ import '@fullcalendar/react/themes/monarch/palettes/purple.css'; // YOUR THEME'S
 import '@fullcalendar/react/themes/monarch/theme.css'; // YOUR THEME
 
 const events = [
-  { title: 'Test event 1', start: '2026-11-01T10:00', color: "blue" },
-  { title: 'event2', start: '2026-11-05T09:00', end: '2026-11-07T17:00' },
+  { title: 'Test event 1', start: '2026-11-13T10:00', color: "blue" },
+  { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
 ];
 
 function toTask(assignment) {

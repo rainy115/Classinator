@@ -118,7 +118,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
         </header>
         <form className={styles.form} onSubmit={handleSave} noValidate>
           <label className={styles.row}>
-            <span>Assignment Name</span>
+            <span>Assignment Name <span className={styles.required} aria-hidden="true">*</span></span>
             <input type="text"
                 required
               value={title}
@@ -127,7 +127,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           </label>
 
           <label className={styles.row}>
-            <span>Course Name</span>
+            <span>Course Name <span className={styles.required} aria-hidden="true">*</span></span>
             <select
               required
               value={course}
@@ -152,7 +152,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           </label>
 
           <label className={styles.row}>
-            <span>Due Date</span>
+            <span>Due Date <span className={styles.required} aria-hidden="true">*</span></span>
             <input
               type="date"
               value={dueDate}

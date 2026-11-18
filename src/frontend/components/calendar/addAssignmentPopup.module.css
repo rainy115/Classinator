@@ -50,6 +50,11 @@
   padding-top: 10px;
 }
 
+.required {
+  color: #c62828;
+  font-weight: 700;
+}
+
 .row input,
 .row select,
 .row textarea {

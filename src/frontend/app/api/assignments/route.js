@@ -1,4 +1,4 @@
-import { AssignmentValidationError } from "../../../assignment/AssignmentService";
+import { AssignmentConflictError, AssignmentValidationError } from "../../../assignment/AssignmentService";
 import { createAssignmentApi } from "../../../assignment/createAssignmentApi";
 
 export async function GET() {
@@ -23,6 +23,9 @@ export async function POST(request) {
         { error: error.message, fieldErrors: error.errors },
         { status: 400 },
       );
+    }
+    if (error instanceof AssignmentConflictError) {
+      return Response.json({ error: error.message }, { status: 409 });
     }
     return Response.json({ error: "Unable to create assignment." }, { status: 500 });
   }

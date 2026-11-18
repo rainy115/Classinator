@@ -1,4 +1,4 @@
-import { AssignmentValidationError } from "../../../../assignment/AssignmentService";
+import { AssignmentConflictError, AssignmentValidationError } from "../../../../assignment/AssignmentService";
 import { createAssignmentApi } from "../../../../assignment/createAssignmentApi";
 
 export async function GET(_request, { params }) {
@@ -31,6 +31,9 @@ export async function PUT(request, { params }) {
         { error: error.message, fieldErrors: error.errors },
         { status: 400 },
       );
+    }
+    if (error instanceof AssignmentConflictError) {
+      return Response.json({ error: error.message }, { status: 409 });
     }
     return Response.json({ error: "Unable to update assignment." }, { status: 500 });
   }

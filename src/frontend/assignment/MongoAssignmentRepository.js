@@ -2,11 +2,29 @@ import { ObjectId } from "mongodb";
 import { getDatabase } from "../lib/mongodb";
 import Assignment from "./Assignment";
 import AssignmentRepository from "./AssignmentRepository";
+import { AssignmentConflictError } from "./AssignmentService";
+
+let assignmentIndexPromise;
 
 export default class MongoAssignmentRepository extends AssignmentRepository {
   async collection() {
     const database = await getDatabase();
-    return database.collection("assignments");
+    const collection = database.collection("assignments");
+    if (!assignmentIndexPromise) {
+      assignmentIndexPromise = collection.createIndex(
+        { course: 1, title: 1 },
+        {
+          unique: true,
+          collation: { locale: "en", strength: 2 },
+          name: "unique_course_assignment_title",
+        },
+      ).catch((error) => {
+        assignmentIndexPromise = undefined;
+        throw error;
+      });
+    }
+    await assignmentIndexPromise;
+    return collection;
   }
 
   async findAll() {
@@ -25,18 +43,29 @@ export default class MongoAssignmentRepository extends AssignmentRepository {
   async insert(assignment) {
     const collection = await this.collection();
     const document = assignment.toDocument();
-    const result = await collection.insertOne(document);
-    return new Assignment({ ...document, id: result.insertedId.toString() });
+    try {
+      const result = await collection.insertOne(document);
+      return new Assignment({ ...document, id: result.insertedId.toString() });
+    } catch (error) {
+      if (error.code === 11000) throw new AssignmentConflictError();
+      throw error;
+    }
   }
 
   async update(id, assignment) {
     if (!ObjectId.isValid(id)) return null;
     const collection = await this.collection();
     const document = assignment.toDocument();
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { ...document, createdAt: assignment.createdAt, updatedAt: new Date() } },
-    );
+    let result;
+    try {
+      result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { ...document, createdAt: assignment.createdAt, updatedAt: new Date() } },
+      );
+    } catch (error) {
+      if (error.code === 11000) throw new AssignmentConflictError();
+      throw error;
+    }
     if (result.matchedCount === 0) return null;
     return this.findById(id);
   }

@@ -9,6 +9,13 @@ export class AssignmentValidationError extends Error {
   }
 }
 
+export class AssignmentConflictError extends Error {
+  constructor() {
+    super("An assignment with this name already exists for this course.");
+    this.name = "AssignmentConflictError";
+  }
+}
+
 export default class AssignmentService {
   constructor(repository, validator = new AssignmentValidator()) {
     this.repository = repository;

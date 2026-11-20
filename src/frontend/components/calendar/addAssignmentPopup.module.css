@@ -50,6 +50,11 @@
   padding-top: 10px;
 }
 
+.required {
+  color: #c62828;
+  font-weight: 700;
+}
+
 .row input,
 .row select,
 .row textarea {
@@ -146,7 +151,7 @@
 
 .frequencySettings {
   display: grid;
-  grid-template-columns: minmax(130px, 1fr) repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(110px, 1fr) repeat(3, minmax(0, 1fr));
   align-items: end;
   gap: 12px;
   padding-top: 4px;

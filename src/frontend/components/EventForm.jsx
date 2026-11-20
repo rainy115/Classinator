@@ -2,66 +2,69 @@
 
 import { useState } from "react";
 import styles from "./EventForm.module.css";
-export default function EventForm({ onClose, onSaved, initialEvent }) {
 
-  const [title, setTitle] = useState(initialEvent?.title ?? "");
+function eventFormValues(event) {
+  if (!event) return { title: "", eventDate: "", startTime: "", endTime: "", description: "" };
+  const startDate = String(event.start ?? "").slice(0, 10);
+  const endDate = String(event.end ?? "").slice(0, 10);
+  const startTimeValue = typeof event.start === "string" ? event.start.match(/T(\d{2}:\d{2})/)?.[1] ?? "" : "";
+  const endTimeValue = typeof event.end === "string" ? event.end.match(/T(\d{2}:\d{2})/)?.[1] ?? "" : "";
+  const endIsNextMidnight = endDate !== startDate && endTimeValue === "00:00";
+  const isLegacyEndOnly = event.startTimeProvided === undefined
+    && startTimeValue === "00:00"
+    && endDate === startDate
+    && endTimeValue !== "00:00";
 
-  const [eventDate, setEventDate] = useState(
-    initialEvent?.start?.slice(0, 10) ?? ""
-  );
+  return {
+    title: event.title ?? "",
+    eventDate: startDate,
+    startTime: event.allDay || event.startTimeProvided === false || isLegacyEndOnly ? "" : startTimeValue,
+    endTime: event.allDay || event.endTimeProvided === false || endIsNextMidnight ? "" : endTimeValue,
+    description: event.description ?? "",
+  };
+}
 
-  const [startTime, setStartTime] = useState(
-    initialEvent?.start?.slice(11, 16) ?? ""
-  );
+export default function EventForm({ onClose, onSaved, initialEvent = null }) {
+  const initialValues = eventFormValues(initialEvent);
 
-  const [endTime, setEndTime] = useState(
-    initialEvent?.end?.slice(11, 16) ?? ""
-  );
-
-  const [description, setDesc] = useState(
-    initialEvent?.description ?? ""
-  );
+  const [title, setTitle] = useState(initialValues.title);
+  const [eventDate, setEventDate] = useState(initialValues.eventDate);
+  const [startTime, setStartTime] = useState(initialValues.startTime);
+  const [endTime, setEndTime] = useState(initialValues.endTime);
+  const [description, setDesc] = useState(initialValues.description);
+  const [errorMessage, setErrorMessage] = useState("");
 
 
 const handleSubmit = async (e) =>
 {
 	e.preventDefault();
-  const start = `${eventDate}T${startTime}`;
-  const end = `${eventDate}T${endTime}`;
-
+  setErrorMessage("");
   const eventData = {
-	  title: title,
-	  start: start,
-	  end: end,
-  	description: description
+    title,
+    eventDate,
+    startTime,
+    endTime,
+    description,
+    ...(initialEvent ? { id: initialEvent._id ?? String(initialEvent.id).replace(/^event-/, "") } : {}),
   };
 
+  try {
+    const response = await fetch("/api/events", {
+      method: initialEvent ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(eventData)
+    });
+    const result = await response.json();
 
+    if (!response.ok) throw new Error(result.error ?? "Failed to save event.");
 
-  const isEditing = Boolean(initialEvent?._id);
-
-  const response = await fetch("/api/events", {
-  method: isEditing ? "PATCH" : "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(
-    isEditing
-      ? { ...eventData, id: initialEvent._id }
-      : eventData
-  )
-});
-
-
-
-
-  if (!response.ok)
-  {
-    throw new Error("Failed to save event");
+    onSaved?.(result);
+    onClose();
+  } catch (error) {
+    setErrorMessage(error.message || "Failed to save event.");
   }
-  
-  const savedEvent = await response.json();
-  onSaved(savedEvent);
 };
 
 
@@ -81,30 +84,32 @@ const handleSubmit = async (e) =>
 
       <form className={styles.form} onSubmit={handleSubmit}> 
 
-        <label> Event Name: </label>
+        <label> Event Name <span className={styles.required} aria-hidden="true">*</span>: </label>
           <input
             type="text"
             placeholder="Enter event name"
+            required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             />
 
 
-        <label> Event Date: </label>
+        <label> Event Date <span className={styles.required} aria-hidden="true">*</span>: </label>
           <input type="date" 
           placeholder="Select Event Date" 
+          required
           value = {eventDate}
           onChange={(e) => setEventDate(e.target.value)}
           />
         
-        <label> Event Start Time: </label>
+        <label> Event Start Time (optional): </label>
           <input type="time" 
           placeholder="Select Event Start Time" 
           value = {startTime}
           onChange={(e) => setStartTime(e.target.value)}
           />
 
-        <label> Event End Time: </label>
+        <label> Event End Time (optional): </label>
           <input type="time" 
           placeholder="Select Event End Time" 
           value = {endTime}
@@ -118,8 +123,10 @@ const handleSubmit = async (e) =>
           onChange={(e) => setDesc(e.target.value)}
         />
 
+        {errorMessage && <p className={styles.errorMessage} role="alert">{errorMessage}</p>}
+
         <button className={styles.saveButton} type="submit">
-          {initialEvent ? "Update Event" : "Save Event"}
+          {initialEvent ? "Save Changes" : "Save Event"}
         </button>
 
       </form>

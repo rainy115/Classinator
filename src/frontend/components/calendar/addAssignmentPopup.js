@@ -8,6 +8,7 @@ const EMPTY_FORM = {
   course: "",
   description: "",
   dueDate: "",
+  startDate: "",
   dueTime: "",
   priority: "Medium",
   difficulty: 5,
@@ -25,6 +26,7 @@ function toFormValues(assignment) {
     course: assignment.courseId ?? assignment.course ?? "",
     description: assignment.description ?? "",
     dueDate,
+    startDate: assignment.startDate ?? "",
     dueTime: dueTime.slice(0, 5),
     priority: assignment.priority ?? "Medium",
     difficulty: Number(assignment.difficulty ?? 5),
@@ -53,6 +55,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
   const [course, setCourse] = useState(() => initialValues.course);
   const [description, setDescription] = useState(() => initialValues.description);
   const [dueDate, setDueDate] = useState(() => initialValues.dueDate);
+  const [startDate, setStartDate] = useState(() => initialValues.startDate);
   const [dueTime, setDueTime] = useState(() => initialValues.dueTime);
   const [priority, setPriority] = useState(() => initialValues.priority);
   const [hoursPerDay, setHoursPerDay] = useState(() => initialValues.hoursPerDay);
@@ -79,6 +82,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
       repeat: repeatEnabled,
       hoursPerDay: repeatEnabled && hoursPerDay !== "" ? Number(hoursPerDay) : null,
       frequencyDays: repeatEnabled && frequencyDays !== "" ? Number(frequencyDays) : null,
+      startDate: repeatEnabled ? startDate : null,
       notes,
     };
 
@@ -118,7 +122,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
         </header>
         <form className={styles.form} onSubmit={handleSave} noValidate>
           <label className={styles.row}>
-            <span>Assignment Name</span>
+            <span>Assignment Name <span className={styles.required} aria-hidden="true">*</span></span>
             <input type="text"
                 required
               value={title}
@@ -127,7 +131,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           </label>
 
           <label className={styles.row}>
-            <span>Course Name</span>
+            <span>Course Name <span className={styles.required} aria-hidden="true">*</span></span>
             <select
               required
               value={course}
@@ -152,7 +156,7 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
           </label>
 
           <label className={styles.row}>
-            <span>Due Date</span>
+            <span>Due Date <span className={styles.required} aria-hidden="true">*</span></span>
             <input
               type="date"
               value={dueDate}
@@ -214,23 +218,36 @@ function AssignmentPopupContent({ isOpen, initialAssignment = null, onClose, onS
             <div className={styles.frequencySettings}>
               <strong>Frequency Settings:</strong>
               <label>
-                <span>Time per day (hours):</span>
+                <span>Start Date {repeatEnabled && <span className={styles.required} aria-hidden="true">*</span>}</span>
+                <input
+                  type="date"
+                  required={repeatEnabled}
+                  disabled={!repeatEnabled}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </label>
+              <label>
+                <span>Time per day (hours): {repeatEnabled && <span className={styles.required} aria-hidden="true">*</span>}</span>
                 <input
                   type="number"
                   min="0.25"
-                  max="24"
+                  max="9"
                   step="0.25"
+                  required={repeatEnabled}
                   disabled={!repeatEnabled}
                   value={hoursPerDay}
                   onChange={(e) => setHoursPerDay(e.target.value)}
                 />
               </label>
               <label>
-                <span>Frequency of days:</span>
+                <span>Frequency of days per week: {repeatEnabled && <span className={styles.required} aria-hidden="true">*</span>}</span>
                 <input
                   type="number"
                   min="1"
+                  max="7"
                   step="1"
+                  required={repeatEnabled}
                   disabled={!repeatEnabled}
                   value={frequencyDays}
                   onChange={(e) => setFrequencyDays(e.target.value)}

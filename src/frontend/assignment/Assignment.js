@@ -30,6 +30,7 @@ export default class Assignment {
       repeat: this.studySchedule.enabled,
       hoursPerDay: this.studySchedule.hoursPerDay,
       frequencyDays: this.studySchedule.frequencyDays,
+      startDate: this.studySchedule.startDate,
       notes: this.notes,
       completed: this.completed,
       createdAt: this.createdAt,

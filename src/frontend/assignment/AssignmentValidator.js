@@ -8,6 +8,7 @@ export default class AssignmentValidator {
     const title = typeof input.title === "string" ? input.title.trim() : "";
     const course = typeof input.course === "string" ? input.course.trim() : "";
     const dueDate = typeof input.dueDate === "string" ? input.dueDate.trim() : "";
+    const startDate = typeof input.startDate === "string" ? input.startDate.trim() : "";
     const difficulty = Number(input.difficulty);
     const repeat = Boolean(input.repeat ?? input.studySchedule?.enabled);
     const hoursPerDay = Number(input.hoursPerDay ?? input.studySchedule?.hoursPerDay);
@@ -30,13 +31,19 @@ export default class AssignmentValidator {
     if (repeat && (
       !Number.isFinite(hoursPerDay)
       || hoursPerDay < 0.25
-      || hoursPerDay > 24
+      || hoursPerDay > 9
       || Math.abs(hoursPerDay * 4 - Math.round(hoursPerDay * 4)) > 1e-8
     )) {
-      errors.hoursPerDay = "Hours per day must be between 0.25 and 24.";
+      errors.hoursPerDay = "Time per day must be between 0.25 and 9 hours.";
     }
-    if (repeat && (!Number.isInteger(frequencyDays) || frequencyDays < 1)) {
-      errors.frequencyDays = "Frequency of days must be a positive whole number.";
+    if (repeat && (!Number.isInteger(frequencyDays) || frequencyDays < 1 || frequencyDays > 7)) {
+      errors.frequencyDays = "Frequency must be a whole number from 1 to 7 days per week.";
+    }
+    if (repeat && (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || Number.isNaN(Date.parse(startDate)))) {
+      errors.startDate = "Choose a valid start date for the study sessions.";
+    }
+    if (repeat && startDate && dueDate && startDate > dueDate.slice(0, 10)) {
+      errors.startDate = "Start date must be on or before the due date.";
     }
 
     return {
@@ -53,6 +60,7 @@ export default class AssignmentValidator {
         repeat,
         hoursPerDay: repeat ? hoursPerDay : null,
         frequencyDays: repeat ? frequencyDays : null,
+        startDate: repeat ? startDate : null,
         description: typeof input.description === "string" ? input.description.trim() : "",
         notes: typeof input.notes === "string" ? input.notes.trim() : "",
       },

@@ -1,5 +1,6 @@
 import { getDatabase } from "../../../lib/mongodb";
 import { ObjectId } from "mongodb";
+import createEventApi from "../../../event/createEventApi";
 
 function nextDateKey(dateKey) {
     const [year, month, day] = dateKey.split("-").map(Number);
@@ -66,9 +67,9 @@ function normalizeEventData(data) {
 
 export async function GET(request)
 {
-    const db = await getDatabase()
-    const eventsCollection = db.collection("events")
-    const events = await eventsCollection.find({}).toArray()
+    const eventApi = createEventApi();
+
+    const events = await eventApi.getEvents();
     
     return Response.json(events);
 }

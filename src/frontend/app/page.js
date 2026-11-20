@@ -24,6 +24,14 @@ const STUDY_DAY_START = 10 * 60;
 const STUDY_DAY_END = 19 * 60;
 const EVENT_BUFFER_MINUTES = 30;
 
+
+const events = [
+  { title: 'Test event 1', start: '2026-11-13T10:00', color: "blue" },
+  { title: 'event2', start: '2026-11-17T09:00', end: '2026-11-19T17:00' },
+];
+
+
+
 function toTask(assignment) {
   const dueAt = assignment.dueDate ?? "";
   return {
@@ -209,11 +217,16 @@ export default function Calendar() {
   const [showTimeline, setShowTimeline] = useState(false);
   const [assignments, setAssignments] = useState([]);
   const [events, setEvents] = useState([]);
-  const [editingEvent, setEditingEvent] = useState(null);
+
+
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
   const [assignmentError, setAssignmentError] = useState("");
+  const [personalEvents, setPersonalEvents] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
+
+
 
   useEffect(() => {
     let active = true;
@@ -232,6 +245,20 @@ export default function Calendar() {
       .finally(() => {
         if (active) setIsLoadingAssignments(false);
       });
+    
+      fetch("/api/events")
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Unable to load events.");
+      return result;
+    })
+    .then((events) => {
+      if (active) setPersonalEvents(events);
+    })
+    .catch((error) => {
+      if (active) console.error("Unable to load events:", error);
+    });
+
     return () => { active = false; };
   }, []);
 
@@ -256,8 +283,24 @@ export default function Calendar() {
   }, []);
 
 
+
+
+
   const calendarEvents = [
     ...events,
+
+    ...personalEvents
+      .filter((event) =>
+        event.title && !Number.isNaN(Date.parse(event.start))
+      )
+      .map((event) => ({
+        id: event._id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        color: "#28644f",
+      })),
+
     ...assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
       title: `${assignment.course}: ${assignment.title}`,
@@ -267,6 +310,10 @@ export default function Calendar() {
     })),
     ...buildStudyCalendarEvents(assignments, events),
   ];
+
+
+
+
 
   async function toggleTask(assignmentId) {
     const assignment = assignments.find((item) => item.id === assignmentId);
@@ -290,6 +337,9 @@ export default function Calendar() {
       setAssignmentError(error.message || "Unable to update assignment.");
     }
   }
+
+
+
 
   function handleAssignmentSaved(assignment) {
     const savedTask = toTask(assignment);
@@ -382,12 +432,15 @@ export default function Calendar() {
             setEditingEvent(null);
             setShowEventForm(true);
             setShowAddMenu(false);
+            setEditingEvent(null);
           }}>
             Add Event
           </button>
 
         </div>
     )}
+
+
       {showEventForm && (
         <EventForm
           key={editingEvent?.id ?? "new-event"}

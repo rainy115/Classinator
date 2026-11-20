@@ -28,6 +28,11 @@
   gap: 12px;
 }
 
+.required {
+  color: #c62828;
+  font-weight: 700;
+}
+
 .form input, .form textarea {
   width: 100%;
   padding: 10px;

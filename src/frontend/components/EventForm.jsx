@@ -84,7 +84,7 @@ const handleSubmit = async (e) =>
 
       <form className={styles.form} onSubmit={handleSubmit}> 
 
-        <label> Event Name: </label>
+        <label> Event Name <span className={styles.required} aria-hidden="true">*</span>: </label>
           <input
             type="text"
             placeholder="Enter event name"
@@ -94,7 +94,7 @@ const handleSubmit = async (e) =>
             />
 
 
-        <label> Event Date: </label>
+        <label> Event Date <span className={styles.required} aria-hidden="true">*</span>: </label>
           <input type="date" 
           placeholder="Select Event Date" 
           required

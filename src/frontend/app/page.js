@@ -221,7 +221,6 @@ export default function Calendar() {
 
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(true);
   const [assignmentError, setAssignmentError] = useState("");
-  const [personalEvents, setPersonalEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [showAssignmentPopup, setShowAssignmentPopup] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
@@ -246,19 +245,6 @@ export default function Calendar() {
         if (active) setIsLoadingAssignments(false);
       });
     
-      fetch("/api/events")
-    .then(async (response) => {
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "Unable to load events.");
-      return result;
-    })
-    .then((events) => {
-      if (active) setPersonalEvents(events);
-    })
-    .catch((error) => {
-      if (active) console.error("Unable to load events:", error);
-    });
-
     return () => { active = false; };
   }, []);
 
@@ -287,19 +273,10 @@ export default function Calendar() {
 
 
   const calendarEvents = [
-    ...events,
-
-    ...personalEvents
-      .filter((event) =>
-        event.title && !Number.isNaN(Date.parse(event.start))
-      )
-      .map((event) => ({
-        id: event._id,
-        title: event.title,
-        start: event.start,
-        end: event.end,
-        color: "#28644f",
-      })),
+    ...events.map((event) => ({
+      ...event,
+      color: "#6750A4",
+    })),
 
     ...assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
